@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/cebilon123/slogger/gather/gen/proto"
+	"github.com/cebilon123/slogger/gather/pkg/gen/proto"
 	"google.golang.org/grpc"
 	"log"
 	"net"

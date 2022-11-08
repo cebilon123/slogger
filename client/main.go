@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/cebilon123/slogger/gather/gen/proto"
+	"github.com/cebilon123/slogger/gather/pkg/gen/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
