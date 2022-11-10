@@ -5,10 +5,12 @@ import (
 	"github.com/cebilon123/slogger/gather/pkg/gen/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"io"
 	"log"
 	"time"
 )
 
+// just used to test things out
 func main() {
 	conn, err := grpc.Dial("localhost:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -28,6 +30,9 @@ func main() {
 			Type:    int32(i),
 			Message: "",
 		})
+		if err == io.EOF {
+			return
+		}
 		if err != nil {
 			log.Println(err)
 		}

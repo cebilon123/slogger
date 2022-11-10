@@ -36,10 +36,17 @@ func (h *handler) Start() error {
 		return err
 	}
 	grpcServer := grpc.NewServer()
-	initApiServers(ctx, grpcServer)
 
-	logger.Info(fmt.Sprintf("Starting TCP server on port: %s", config.Environment.Port))
-	logger.Info(fmt.Sprintf("Server address: %s", listener.Addr().String()))
+	aggregator := clog.NewAggregator(ctx)
+	apiServer := clog.NewLogApiServer(ctx, aggregator, logger)
+	sender := clog.NewSender(aggregator, logger)
+	if err := sender.StartSendingProcess(ctx); err != nil {
+		return err
+	}
+
+	proto.RegisterLogApiServer(grpcServer, apiServer)
+
+	logger.Info(fmt.Sprintf("Starting TCP server, address: %s", listener.Addr().String()))
 
 	err = grpcServer.Serve(listener)
 	if err != nil {
@@ -50,8 +57,6 @@ func (h *handler) Start() error {
 }
 
 // initApiServers initialize api servers and all dependencies used in application.
-func initApiServers(ctx context.Context, grpcServer *grpc.Server) {
-	aggregator := clog.NewAggregator(ctx)
-	apiServer := clog.NewLogApiServer(ctx, aggregator)
-	proto.RegisterLogApiServer(grpcServer, apiServer)
+func initApiServers(ctx context.Context, grpcServer *grpc.Server, l *zap.Logger) {
+
 }

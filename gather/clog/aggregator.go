@@ -15,6 +15,11 @@ type Aggregator struct {
 	enqueuedLogsCount uint64
 }
 
+func (a *Aggregator) Close() error {
+	close(a.logsChan)
+	return nil
+}
+
 func NewAggregator(_ context.Context) *Aggregator {
 	logsChan := make(chan model.Log)
 	return &Aggregator{

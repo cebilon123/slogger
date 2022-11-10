@@ -5,4 +5,5 @@ package model
 type Log struct {
 	Type    int32
 	Message string
+	Caller  string
 }

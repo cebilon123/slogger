@@ -12,8 +12,10 @@ service LogApi {
 message LogRequest {
   int32 type = 1;
   string message = 2;
+  string caller = 3;
 }
 
 message LogResponse {
-  int32 type = 1;
+  int32 code = 1;
+  string message = 2;
 }
