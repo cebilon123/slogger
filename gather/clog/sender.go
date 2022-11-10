@@ -10,6 +10,8 @@ type Sender struct {
 	logger     *zap.Logger
 }
 
+// NewSender creates new sender that handles sending
+// logs to desired address.
 func NewSender(a *Aggregator, l *zap.Logger) *Sender {
 	return &Sender{
 		aggregator: a,
