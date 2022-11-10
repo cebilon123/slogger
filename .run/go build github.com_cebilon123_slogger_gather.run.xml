@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="go build github.com/cebilon123/slogger/gather" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
+    <module name="slogger" />
+    <working_directory value="$PROJECT_DIR$" />
+    <envs>
+      <env name="PORT" value="8080" />
+    </envs>
+    <kind value="PACKAGE" />
+    <package value="github.com/cebilon123/slogger/gather" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/gather/main.go" />
+    <method v="2" />
+  </configuration>
+</component>

@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type LogApiClient interface {
+	StreamLog(ctx context.Context, opts ...grpc.CallOption) (LogApi_StreamLogClient, error)
 	Log(ctx context.Context, in *LogRequest, opts ...grpc.CallOption) (*LogResponse, error)
 }
 
@@ -33,9 +34,43 @@ func NewLogApiClient(cc grpc.ClientConnInterface) LogApiClient {
 	return &logApiClient{cc}
 }
 
+func (c *logApiClient) StreamLog(ctx context.Context, opts ...grpc.CallOption) (LogApi_StreamLogClient, error) {
+	stream, err := c.cc.NewStream(ctx, &LogApi_ServiceDesc.Streams[0], "/log.LogApi/StreamLog", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &logApiStreamLogClient{stream}
+	return x, nil
+}
+
+type LogApi_StreamLogClient interface {
+	Send(*LogRequest) error
+	CloseAndRecv() (*LogResponse, error)
+	grpc.ClientStream
+}
+
+type logApiStreamLogClient struct {
+	grpc.ClientStream
+}
+
+func (x *logApiStreamLogClient) Send(m *LogRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *logApiStreamLogClient) CloseAndRecv() (*LogResponse, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(LogResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func (c *logApiClient) Log(ctx context.Context, in *LogRequest, opts ...grpc.CallOption) (*LogResponse, error) {
 	out := new(LogResponse)
-	err := c.cc.Invoke(ctx, "/main.LogApi/Log", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/log.LogApi/Log", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,6 +81,7 @@ func (c *logApiClient) Log(ctx context.Context, in *LogRequest, opts ...grpc.Cal
 // All implementations must embed UnimplementedLogApiServer
 // for forward compatibility
 type LogApiServer interface {
+	StreamLog(LogApi_StreamLogServer) error
 	Log(context.Context, *LogRequest) (*LogResponse, error)
 	mustEmbedUnimplementedLogApiServer()
 }
@@ -54,6 +90,9 @@ type LogApiServer interface {
 type UnimplementedLogApiServer struct {
 }
 
+func (UnimplementedLogApiServer) StreamLog(LogApi_StreamLogServer) error {
+	return status.Errorf(codes.Unimplemented, "method StreamLog not implemented")
+}
 func (UnimplementedLogApiServer) Log(context.Context, *LogRequest) (*LogResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Log not implemented")
 }
@@ -70,6 +109,32 @@ func RegisterLogApiServer(s grpc.ServiceRegistrar, srv LogApiServer) {
 	s.RegisterService(&LogApi_ServiceDesc, srv)
 }
 
+func _LogApi_StreamLog_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(LogApiServer).StreamLog(&logApiStreamLogServer{stream})
+}
+
+type LogApi_StreamLogServer interface {
+	SendAndClose(*LogResponse) error
+	Recv() (*LogRequest, error)
+	grpc.ServerStream
+}
+
+type logApiStreamLogServer struct {
+	grpc.ServerStream
+}
+
+func (x *logApiStreamLogServer) SendAndClose(m *LogResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *logApiStreamLogServer) Recv() (*LogRequest, error) {
+	m := new(LogRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func _LogApi_Log_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(LogRequest)
 	if err := dec(in); err != nil {
@@ -80,7 +145,7 @@ func _LogApi_Log_Handler(srv interface{}, ctx context.Context, dec func(interfac
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/main.LogApi/Log",
+		FullMethod: "/log.LogApi/Log",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LogApiServer).Log(ctx, req.(*LogRequest))
@@ -92,7 +157,7 @@ func _LogApi_Log_Handler(srv interface{}, ctx context.Context, dec func(interfac
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var LogApi_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "main.LogApi",
+	ServiceName: "log.LogApi",
 	HandlerType: (*LogApiServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -100,6 +165,12 @@ var LogApi_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _LogApi_Log_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamLog",
+			Handler:       _LogApi_StreamLog_Handler,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "log.proto",
 }

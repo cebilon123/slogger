@@ -1,10 +1,11 @@
 syntax = "proto3";
 
-package main;
+package log;
 
 option go_package= "./proto";
 
 service LogApi {
+  rpc StreamLog(stream LogRequest) returns (LogResponse) {}
   rpc Log(LogRequest) returns (LogResponse) {}
 }
 

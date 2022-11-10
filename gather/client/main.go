@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
+	"time"
 )
 
 func main() {
@@ -15,14 +16,21 @@ func main() {
 	}
 
 	client := proto.NewLogApiClient(conn)
-	for i := 0; i < 25; i++ {
-		res, err := client.Log(context.Background(), &proto.LogRequest{
+	logStream, err := client.StreamLog(context.Background())
+	if err != nil {
+		log.Println(err)
+	}
+
+	i := 0
+	for {
+		time.Sleep(time.Second * 1)
+		err := logStream.SendMsg(&proto.LogRequest{
 			Type:    int32(i),
-			Message: "asd",
+			Message: "",
 		})
 		if err != nil {
 			log.Println(err)
 		}
-		log.Printf("Got response: %d", res.Type)
+		i++
 	}
 }

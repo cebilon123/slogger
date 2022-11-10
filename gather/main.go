@@ -3,9 +3,8 @@ package main
 import (
 	"context"
 	"github.com/cebilon123/slogger/gather/pkg/gen/proto"
-	"google.golang.org/grpc"
+	"github.com/cebilon123/slogger/gather/server"
 	"log"
-	"net"
 )
 
 type testApiServer struct {
@@ -17,16 +16,8 @@ func (t testApiServer) Log(ctx context.Context, in *proto.LogRequest) (*proto.Lo
 }
 
 func main() {
-	listener, err := net.Listen("tcp", "localhost:8080")
-	if err != nil {
-		log.Fatalln(err)
-	}
-	grpcServer := grpc.NewServer()
-	proto.RegisterLogApiServer(grpcServer, &testApiServer{})
-
-	log.Println("Started TCP server")
-	err = grpcServer.Serve(listener)
-	if err != nil {
+	handler := server.NewHandler()
+	if err := handler.Start(); err != nil {
 		log.Fatalln(err)
 	}
 }
