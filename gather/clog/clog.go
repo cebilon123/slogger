@@ -3,7 +3,7 @@ package clog
 import (
 	"context"
 	"errors"
-	"github.com/cebilon123/slogger/gather/clog/model"
+	"github.com/cebilon123/slogger/gather/model"
 	"github.com/cebilon123/slogger/gather/pkg/gen/proto"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"

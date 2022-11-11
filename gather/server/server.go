@@ -6,6 +6,7 @@ import (
 	"github.com/cebilon123/slogger/gather/clog"
 	"github.com/cebilon123/slogger/gather/config"
 	"github.com/cebilon123/slogger/gather/pkg/gen/proto"
+	"github.com/cebilon123/slogger/gather/publisher"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"net"
@@ -39,8 +40,8 @@ func (h *handler) Start() error {
 
 	aggregator := clog.NewAggregator(ctx)
 	apiServer := clog.NewLogApiServer(ctx, aggregator, logger)
-	sender := clog.NewSender(aggregator, logger)
-	if err := sender.StartSendingProcess(ctx); err != nil {
+	pub := publisher.New(aggregator, logger)
+	if err := pub.StartPublishing(ctx); err != nil {
 		return err
 	}
 
@@ -54,9 +55,4 @@ func (h *handler) Start() error {
 	}
 
 	return nil
-}
-
-// initApiServers initialize api servers and all dependencies used in application.
-func initApiServers(ctx context.Context, grpcServer *grpc.Server, l *zap.Logger) {
-
 }

@@ -2,7 +2,7 @@ package clog
 
 import (
 	"context"
-	"github.com/cebilon123/slogger/gather/clog/model"
+	"github.com/cebilon123/slogger/gather/model"
 	"sync/atomic"
 )
 

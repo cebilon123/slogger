@@ -7,7 +7,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"io"
 	"log"
-	"time"
+	"strconv"
+	"sync"
 )
 
 // just used to test things out
@@ -23,19 +24,23 @@ func main() {
 		log.Println(err)
 	}
 
-	i := 0
-	for {
-		time.Sleep(time.Second * 1)
-		err := logStream.SendMsg(&proto.LogRequest{
-			Type:    int32(i),
-			Message: "",
-		})
-		if err == io.EOF {
-			return
-		}
-		if err != nil {
-			log.Println(err)
-		}
-		i++
+	var wg sync.WaitGroup
+	for j := 0; j < 1000000; j++ {
+		wg.Add(1)
+		go func(j int) {
+			defer wg.Done()
+			err := logStream.SendMsg(&proto.LogRequest{
+				Type:    int32(j),
+				Message: strconv.Itoa(j),
+			})
+			if err == io.EOF {
+				return
+			}
+			if err != nil {
+				log.Println(err)
+			}
+		}(j)
 	}
+
+	wg.Wait()
 }
