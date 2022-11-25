@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package log;
+
+option go_package= "./proto";
+
+service LogApi {
+  rpc Log(LogRequest) returns (LogResponse) {}
+}
+
+message LogRequest {
+  int32 type = 1;
+  string message = 2;
+  string caller = 3;
+}
+
+message LogResponse {
+  int32 code = 1;
+  string message = 2;
+}

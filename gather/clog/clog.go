@@ -31,6 +31,7 @@ func NewLogApiServer(_ context.Context, a *Aggregator, l *zap.Logger) *logApiSer
 	}
 }
 
+// StreamLog streams logs to the aggregator.
 func (l *logApiServer) StreamLog(stream proto.LogApi_StreamLogServer) error {
 	for {
 		lr, err := stream.Recv()
